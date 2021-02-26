@@ -1,3 +1,5 @@
+
+
 public class ExpressionParser {
 
     public String line;
@@ -10,77 +12,34 @@ public class ExpressionParser {
         this.subFormulasNumber = 0;
     }
 
-    //Замена имликации (заменяет -> на >)
+    //Подсчет подформу
 
-    // Подсчет и замена операций отрицания
-    private void countAndDeleteLogicNot() {
-
-        StringBuilder newLine = new StringBuilder();
-        for (char logicNot : this.line.toCharArray()) {
-            if (logicNot != '!') {
-                newLine.append(logicNot);
-            } else {
-                this.subFormulasNumber++;
+    public void parse() {
+        String countSymbols = "";
+        for(int i = 0; i < line.length(); i++){
+            if(line.charAt(i) == '!' || line.charAt(i) == '~' || line.charAt(i) == '&' || line.charAt(i) == '|' || line.charAt(i) == '>') {
+                subFormulasNumber++;
+                continue;
             }
-        }
+            for(char sym: symbols){
+                if(line.charAt(i) == sym){
 
-        this.line = newLine.toString();
-    }
-
-    //Подсчет остальных подформул
-    private void replaceExpression(String line) {
-
-        int balance = 0;
-        int left = 0, right = 0;
-
-        for (int i = 0; i < line.length(); i++) {
-
-            if (line.charAt(i) == '(') {
-                balance++;
-                if (balance == 1) {
-                    left = i;
-                }
-            } else if (line.charAt(i) == ')') {
-                balance--;
-                if (balance == 0) {
-                    right = i;
+                    boolean check = false;
+                    for (int j = 0; j < countSymbols.length(); j++) {
+                        if(countSymbols.charAt(j) == line.charAt(i)){
+                            check = true;
+                        }
+                    }
+                    if(!check){
+                        countSymbols += sym;
+                        subFormulasNumber++;
+                    }
                     break;
                 }
             }
         }
 
-        if (left == 0 && right == 0) {
-            this.subFormulasNumber += line.length();
-        } else {
-            String expression = line.substring(left + 1, right);
-            line = line.replace("(" + expression + ")", "Q");
-            replaceExpression(line);
 
-            replaceExpression(expression);
-            this.subFormulasNumber--;
-        }
-
-        return;
-    }
-
-    public void parse() {
-        //replaceImplication();
-        countAndDeleteLogicNot();
-        replaceExpression(this.line);
-
-        for (int i = 0; i < line.length(); i++) {
-            for(char symbol: symbols) {
-                if(line.charAt(i) == symbol) {
-                    for (int j = i + 1; j < line.length(); j++) {
-                        if(line.charAt(j) == symbol){
-                            subFormulasNumber--;
-                            break;
-                        }
-                    }
-                }
-            }
-
-        }
 
     }
 

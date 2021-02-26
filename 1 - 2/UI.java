@@ -81,7 +81,14 @@ public class UI extends JFrame {
 //----------------
 
             if(formula.checkFormula()){
-                label1 = new JLabel(formula.makeSKNF());
+                String str = formula.makeSKNF();
+                if(!str.equals("")){
+                    label1 = new JLabel(str);
+                }
+                else {
+                    label1 = new JLabel("Нельзя построить СКНФ");
+                }
+
 
             } else {
                 label1 = new JLabel("                Введите правильную формулу ");

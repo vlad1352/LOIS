@@ -63,20 +63,14 @@ public class Formula {
             return false;
         }
 
-        boolean check = false;
-        for (char symbol : symbols) {
-            if (formula.charAt(formula.length() - 1) == symbol || formula.charAt(formula.length() - 1) == '1' || formula.charAt(formula.length() - 1) == '0') {
-                check = true;
-                break;
-            }
-        }
-        if (!check) {
-            if (formula.charAt(formula.length() - 1) != ')') {
-                return false;
-            }
+
+        if (formula.charAt(formula.length() - 1) != ')') {
+            return false;
         }
 
-        int balance = 0, left = 0, right = 0;
+
+        int balance = 0;
+
         for (int i = 0; i < formula.length(); i++) {
             if (formula.charAt(i) == '(') {
                 balance++;
@@ -91,14 +85,15 @@ public class Formula {
         }
         if (balance != 0)
             return false;
+        if(formula.charAt(0) != '(' && formula.charAt(formula.length() - 1) != ')')
+            return false;
 
 
         String str = check(formula);
 
-        if(str == null) {
+        if (str == null) {
             return false;
-        }
-        else if (str.length() != 1) {
+        } else if (str.length() != 1) {
             return false;
         }
 
@@ -107,9 +102,13 @@ public class Formula {
 
     private String check(String line) {
 
-        if(line == null){
+        if (line == null) {
             return null;
         }
+        if (line.length() == 1) {
+            return line;
+        }
+
         int balance = 0;
         int left = 0, right = 0;
 
@@ -128,117 +127,94 @@ public class Formula {
                 }
             }
         }
-        if(left + 1 == right){
+
+        if (left + 1 == right) {
             return null;
         }
 
         if (left == 0 && right == 0) {
 
-            int p = 2000;
             //System.out.println(line);
-            int x = line.indexOf('!');
+            int p = line.indexOf('!');
             //System.out.println("X : "  + x);
-            if (x >= 0 && p > x) {
-
-                p = x;
-
-            }
-            else if (x == -1){
-                for(String operation : operations){
-                    x = line.indexOf(operation);
-                    if(x > 0 && p > x){
-                        p = x;
-                    }
-                }
-            }
-
-
-            while (p >= 0) {
-                // System.out.println("P = " + p);
-                if (line.length() == 1) {
-                    return line;
+            while (p >= 0 && p != line.length() - 1) {
+                if (line.charAt(p + 1) == '1' || line.charAt(p + 1) == '0') {
+                    line = line.replace(line.substring(p, p + 2), "A");
+                } else if (line.charAt(p + 1) >= 'A' && line.charAt(p + 1) <= 'Z') {
+                    line = line.replace(line.substring(p, p + 2), "S");
+                    break;
                 }
 
-                //System.out.println("LINE LENGTH : " + line.length());
-                if (line.charAt(p) == '!') {
-                    if (line.charAt(p + 1) == '1' || line.charAt(p + 1) == '0') {
+                p = line.indexOf('!');
+            }
 
-                        line = line.replace(line.substring(p, p + 2), "A");
-                    } else {
-                        for (char symbol : symbols) {
-                            if (line.charAt(p + 1) == symbol) {
-                               // System.out.println(line);
-                                line = line.replace(line.substring(p, p + 2), "S");
+            if (line.length() == 1) {
+                return line;
+            }
+
+            p = line.indexOf('&');
+            if (p == -1) {
+                p = line.indexOf('|');
+            }
+            if (p == -1) {
+                p = line.indexOf('~');
+            }
+            if (p == -1) {
+                p = line.indexOf('>');
+            }
+            while (p != -1) {
+
+                for (char symbol1 : symbols) {
+                    for (char symbol2 : symbols) {
+                        if (p != line.length() - 1) {
+                            if(line.length() == 1)
+                                return line;
+                            if ((symbol1 == line.charAt(p - 1) && symbol2 == line.charAt(p + 1)) ||
+                                    (line.charAt(p - 1) == '0' && line.charAt(p + 1) == '0') ||
+                                    (line.charAt(p - 1) == '0' && line.charAt(p + 1) == '1') ||
+                                    (line.charAt(p - 1) == '1' && line.charAt(p + 1) == '0') ||
+                                    (line.charAt(p - 1) == '1' && line.charAt(p + 1) == '1') ||
+                                    (line.charAt(p - 1) == '0' && line.charAt(p + 1) == symbol1) ||
+                                    (line.charAt(p - 1) == symbol1 && line.charAt(p + 1) == '0') ||
+                                    (line.charAt(p - 1) == '1' && line.charAt(p + 1) == symbol1) ||
+                                    (line.charAt(p - 1) == symbol1 && line.charAt(p + 1) == '1')) {
+
+                                line = line.replace(line.substring(p - 1, p + 2), "Q");
+                                //System.out.println("RETURN : " + line);
                                 break;
+
                             }
                         }
-                    }
 
-                }
-
-
-                //System.out.println(line);
-                 if (line.charAt(p) == '&' || line.charAt(p) == '|' || line.charAt(p) == '~' || line.charAt(p) == '>') {
-                    //System.out.println("OPERATION : " + p);
-                    if (p != line.length() - 1) {
-                        for (char symbol1 : symbols) {
-                            for (char symbol2 : symbols) {
-                                //System.out.println("LENGTH : " + line.length());
-
-                                if ((symbol1 == line.charAt(p - 1) && symbol2 == line.charAt(p + 1)) ||
-                                        (line.charAt(p - 1) == '0' && line.charAt(p + 1) == '0') ||
-                                        (line.charAt(p - 1) == '0' && line.charAt(p + 1) == '1') ||
-                                        (line.charAt(p - 1) == '1' && line.charAt(p + 1) == '0') ||
-                                        (line.charAt(p - 1) == '1' && line.charAt(p + 1) == '1') ||
-                                        (line.charAt(p - 1) == '0' && line.charAt(p + 1) == symbol1) ||
-                                        (line.charAt(p - 1) == symbol1 && line.charAt(p + 1) == '0') ||
-                                        (line.charAt(p - 1) == '1' && line.charAt(p + 1) == symbol1) ||
-                                        (line.charAt(p - 1) == symbol1 && line.charAt(p + 1) == '1')) {
-
-                                    line = line.replace(line.substring(p - 1, p + 2), "Q");
-                                    //System.out.println("RETURN : " + line);
-                                    return line;
-
-                                }
-                            }
-
-                        }
                     }
                 }
 
-
-                //System.out.println("FIND OPERATION");
-                x = line.indexOf('!');
-
-                if (x > 0 && p > x) {
-
-                    p = x;
-
+                p = line.indexOf('&');
+                if (p == -1) {
+                    p = line.indexOf('|');
                 }
-                else {
-                    for(String operation : operations){
-                        x = line.indexOf(operation);
-                        if(x > 0 && p > x){
-                            p = x;
-                        }
-                    }
+                if (p == -1) {
+                    p = line.indexOf('~');
+                }
+                if (p == -1) {
+                    p = line.indexOf('>');
                 }
             }
+            return line;
+
         } else {
             String expression = line.substring(left + 1, right);
             String str = check(expression);
 
-
-            //System.out.println(str);
             str = check(str);
-            //System.out.println(str);
 
-            if(line == null)
+            if (str == null)
                 return null;
-            line = line.replace("(" + expression + ")", "Q");
+
+            line = line.replace("(" + expression + ")", str);
             line = check(line);
 
-            if(line == null)
+            if (line == null)
                 return null;
 
         }

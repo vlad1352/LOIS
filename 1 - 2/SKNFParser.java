@@ -56,6 +56,17 @@ public class SKNFParser {
 
     private int replaceExpression(String line, int lineNumber, int functionValue) {
 
+        //System.out.println("Start");
+        if(line.length() == 1){
+            int index = matrix.get(0).indexOf(line);
+            //System.out.println(index);
+            //System.out.println(line);
+            //System.out.println("---------------");
+            if(line.equals("1") || line.equals("0"))
+                return functionValue;
+            return Integer.parseInt(matrix.get(lineNumber).get(index));
+        }
+
         int balance = 0;
         int left = 0, right = 0;
 
@@ -98,11 +109,12 @@ public class SKNFParser {
             }
             int p = 2000;
            // System.out.println(line);
-            int x = -2;
+            int x = -2, k = 0;
 
             for(String operation : operations){
                 x = line.indexOf(operation);
                 if(!operation.equals("!") && x > 0) {
+                    k++;
                     if(line.charAt(x) == operation.charAt(0))
                         if(p > x){
                             p = x;
@@ -111,7 +123,8 @@ public class SKNFParser {
             }
 
 
-            while(p > 0) {
+
+            while(p > 0 && k > 0) {
                // System.out.println("P = " + p);
                 if(line.length() == 1)
                     break;
@@ -257,6 +270,12 @@ public class SKNFParser {
        addFunctionValueAtTable();
         System.out.println(matrix);
 
+        int last = -1;
+        for (int i = 1; i < matrix.size(); i++) {
+            if(matrix.get(i).get(matrix.get(i).size() - 1).equals("0")){
+                last = i;
+            }
+        }
 
         // Построение СКНФ по таблиуе истинности
         for (int i = 1; i < matrix.size(); i++) {
@@ -276,7 +295,7 @@ public class SKNFParser {
                     }
                 }
                 sknf += ")";
-                if(i != matrix.size() - 1){
+                if(i != last){
                     sknf += " & ";
                 }
             }
