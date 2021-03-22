@@ -7,18 +7,34 @@ public class Formula {
 
     Formula(String formula) {
         this.formula = formula;
-        replaceImplication();
+        replace();
     }
 
 
-    private void replaceImplication() {
+    private void replace() {
 
         StringBuilder newLine = new StringBuilder();
-        for (char sign : this.formula.toCharArray()) {
-            if (sign != '-') {
-                newLine.append(sign);
+        for (int i = 0; i < formula.length(); i++) {
+            if (formula.charAt(i) == '-' && formula.charAt(i + 1) == '>') {
+                newLine.append('>');
+                i++;
+            }
+
+            else if(formula.charAt(i) == '/' && formula.charAt(i + 1) == '\\'){
+                newLine.append('&');
+                i++;
+            }
+
+            else if(formula.charAt(i) == '\\' && formula.charAt(i + 1) == '/'){
+                newLine.append('|');
+                i++;
+            }
+            else{
+                newLine.append(formula.charAt(i));
+
             }
         }
+
 
         this.formula = newLine.toString();
     }
@@ -62,6 +78,11 @@ public class Formula {
         if (formula.equals("")) {
             return false;
         }
+        for(char s : symbols){
+            if(formula.length() == 1 && formula.charAt(0) == s){
+                return true;
+            }
+        }
 
 
         if (formula.charAt(formula.length() - 1) != ')') {
@@ -89,7 +110,7 @@ public class Formula {
             return false;
 
 
-        String str = check(formula);
+        String str = check(formula, false);
 
         if (str == null) {
             return false;
@@ -100,7 +121,7 @@ public class Formula {
         return true;
     }
 
-    private String check(String line) {
+    private String check(String line, boolean key) {
 
         if (line == null) {
             return null;
@@ -125,6 +146,11 @@ public class Formula {
                     right = i;
                     break;
                 }
+            }
+        }
+        if(key){
+            if(left ==0 && right == line.length() - 1){
+                return null;
             }
         }
 
@@ -204,15 +230,19 @@ public class Formula {
 
         } else {
             String expression = line.substring(left + 1, right);
-            String str = check(expression);
+            if(left == 0 && right == line.length() - 1){
+                key = true;
+            }
+            String str = check(expression, key);
 
-            str = check(str);
+
+            str = check(str,key);
 
             if (str == null)
                 return null;
 
             line = line.replace("(" + expression + ")", str);
-            line = check(line);
+            line = check(line, key);
 
             if (line == null)
                 return null;
