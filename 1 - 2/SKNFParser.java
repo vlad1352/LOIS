@@ -56,12 +56,8 @@ public class SKNFParser {
 
     private int replaceExpression(String line, int lineNumber, int functionValue) {
 
-        //System.out.println("Start");
         if(line.length() == 1){
             int index = matrix.get(0).indexOf(line);
-            //System.out.println(index);
-            //System.out.println(line);
-            //System.out.println("---------------");
             if(line.equals("1") || line.equals("0"))
                 return functionValue;
             return Integer.parseInt(matrix.get(lineNumber).get(index));
@@ -87,9 +83,6 @@ public class SKNFParser {
         }
 
         if (left == 0 && right == 0) {
-            //System.out.println("");
-           //System.out.println( lineNumber + " ITERATION");
-           // System.out.println("LENGTH: " + line.length());
 
             for (int i = 0; i < line.length(); i++) {
                 if(line.charAt(i) == '!'){
@@ -108,7 +101,6 @@ public class SKNFParser {
                 }
             }
             int p = 2000;
-           // System.out.println(line);
             int x = -2, k = 0;
 
             for(String operation : operations){
@@ -125,7 +117,6 @@ public class SKNFParser {
 
 
             while(p > 0 && k > 0) {
-               // System.out.println("P = " + p);
                 if(line.length() == 1)
                     break;
                 for (String operation : operations) {
@@ -205,12 +196,10 @@ public class SKNFParser {
                         }
                         line = line.replace(line.substring(p - 1, p + 2), String.valueOf(functionValue));
 
-                        //System.out.println("LINE : " + line);
                         break;
                     }
                 }
                  x = -2;
-                //System.out.println("FIND OPERATION");
                 for(String operation : operations){
                     if(!operation.equals("!")){
                         x = line.indexOf(operation);
@@ -229,11 +218,9 @@ public class SKNFParser {
             }
 
 
-            //System.out.println(line);
 
         } else {
             String expression = line.substring(left + 1, right);
-            //System.out.println(expression);
 
             functionValue = replaceExpression(expression, lineNumber, functionValue);
 
@@ -251,8 +238,6 @@ public class SKNFParser {
     // Создание из формулы СКНФ
 
     public String makeSKNF(){
-
-
         int a = 0;
         List<String> list1 = new ArrayList<>();
        for (char symbol : symbols){
@@ -261,52 +246,89 @@ public class SKNFParser {
                list1.add(formula.substring(formula.indexOf(symbol), formula.indexOf(symbol) + 1));
            }
        }
-        //System.out.println(a);
        matrix.add(list1);
 
        List<String> list = new ArrayList<>();
        makeTable(a, list);
-        //System.out.println(matrix);
        addFunctionValueAtTable();
-        System.out.println(matrix);
 
         int last = -1;
+        System.out.println(matrix);
         for (int i = 1; i < matrix.size(); i++) {
             if(matrix.get(i).get(matrix.get(i).size() - 1).equals("0")){
                 last = i;
             }
         }
 
-        // Построение СКНФ по таблиуе истинности
-        for (int i = 1; i < matrix.size(); i++) {
-            if(matrix.get(i).get(matrix.get(i).size() - 1).equals("0")){
-                sknf+= "(";
-                for (int j = 0; j < matrix.get(i).size() - 1; j++) {
-
-                    if(matrix.get(i).get(j).equals("0")){
-                        sknf += matrix.get(0).get(j);
-
-                    }
-                    else {
-                        sknf += "(!" + matrix.get(0).get(j) + ")";
-                    }
-                    if(j != matrix.get(i).size() - 2){
-                        sknf += "|";
-                    }
-                }
-                sknf += ")";
-                if(i != last){
-                    sknf += " & ";
-                }
+        // Построение СКНФ по таблицe истинности
+        if(matrix.get(0).size() == 1) {
+            return "";
+        }
+        if(matrix.get(0).size() == 2){
+            if(matrix.get(1).get(matrix.get(1).size() - 1).equals("0")) {
+                sknf = "(" + matrix.get(0).get(0) + ")";
+                return sknf;
             }
-
-
         }
 
 
-
-
+        sknf = makeS();
        return sknf;
+    }
+
+    private String makeS() {
+        List<String> subs = new ArrayList<>();
+        for (int i = 1; i < matrix.size(); i++) {
+            if(matrix.get(i).get(matrix.get(i).size() - 1).equals("0")) {
+                subs.add(make(i));
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("(");
+        int h = subs.size() - 2;
+        for(int i = 0; i < h - 2; i++) {
+            sb.append("(");
+        }
+
+        for (int i = 0; i < subs.size(); i++) {
+            sb.append(subs.get(i));
+            if(i != 0 && i < subs.size() - 1) {
+                sb.append(")");
+            }
+            sb.append("|");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append(")");
+        return sb.toString();
+    }
+
+
+    private String make(int index) {
+        int h = matrix.get(0).size() - 2;
+        StringBuilder sb = new StringBuilder();
+        sb.append("(");
+
+        for(int i = 0; i < h - 2; i++) {
+            sb.append("(");
+        }
+
+        for (int j = 0; j < matrix.get(index).size() - 1; j++) {
+            if(matrix.get(index).get(j).equals("0")) {
+                sb.append(matrix.get(0).get(j));
+            } else {
+                sb.append("(!").append(matrix.get(0).get(j)).append(")");
+            }
+            if(j != 0 && j < matrix.get(index).size() - 2) {
+                sb.append(")");
+            }
+            sb.append("&");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+
+        sb.append(")\n");
+
+        return sb.toString();
     }
 
     //Подсчет унарной операции при заданном значении
@@ -336,14 +358,6 @@ public class SKNFParser {
                 return 1;
         }
 
-        if(operation.equals("|")){
-            if(value1 == 0 && value2 == 0)
-                return 0;
-            if((value1 == 1 && value2 == 0) || (value1 == 0 && value2 == 1))
-                return 1;
-            if(value1 == 1 && value2 == 1)
-                return 1;
-        }
         if(operation.equals(">")){
             if(value1 == 0 && value2 == 0)
                 return 1;
