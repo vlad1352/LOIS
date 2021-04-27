@@ -26,7 +26,7 @@ public class UI extends JFrame {
         panel1.add(textField1);
         panel1.add(jButton1);
         panel1.add(button);
-
+/*
         // Кнопка подсчета подформул и проверки пользователя
         jButton1.addActionListener(e -> {
 
@@ -67,7 +67,7 @@ public class UI extends JFrame {
 
         });
 
-
+*/
         //Кнопка построения СКНФ из заданной формулы
         button.addActionListener(e -> {
             Formula formula = new Formula(textField.getText());
@@ -78,18 +78,17 @@ public class UI extends JFrame {
             JLabel label1;
 
             jButton2.addActionListener(e1 -> jDialog.setVisible(false));
-//----------------
+
 
             if(formula.checkFormula()){
                 String str = formula.makeSKNF();
+                System.out.println(str);
                 if(!str.equals("")){
                     label1 = new JLabel(str);
                 }
                 else {
                     label1 = new JLabel("Нельзя построить СКНФ");
                 }
-
-
             } else {
                 label1 = new JLabel("                Введите правильную формулу ");
             }

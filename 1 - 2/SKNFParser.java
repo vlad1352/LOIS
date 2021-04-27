@@ -18,22 +18,36 @@ public class SKNFParser {
 
     // ЗАполнение таблицы истинности для заданной формулы
     private void makeTable(int numberOfSymbols, List<String> temp){
-
-        if(numberOfSymbols == 0){
-            List<String> l1 = new ArrayList<>();
-            l1.addAll(temp);
-            this.matrix.add(l1);
-            return;
+        for (int i = 0; i < Math.pow(2, numberOfSymbols); i++) {
+           matrix.add(makeRow(i, numberOfSymbols));
         }
 
-        temp.add("1");
-        makeTable(numberOfSymbols - 1, temp);
-        temp.remove(temp.size() - 1);
+    }
 
-        temp.add("0");
-        makeTable(numberOfSymbols - 1, temp);
-        temp.remove(temp.size() -1);
-
+    private List<String> makeRow(int index, int numberOfSymbols) {
+        List<String> row = new ArrayList<>();
+        if(index == 0) {
+            for (int i = 0; i < numberOfSymbols; i++) {
+                row.add("0");
+            }
+            return row;
+        }
+        int b;
+        StringBuilder builder = new StringBuilder();
+        while(index != 0){
+            b = index % 2;
+            builder.append(b);
+            index = index / 2;
+        }
+        builder = builder.reverse();
+        for (int i = 0; i < numberOfSymbols - builder.length(); i++) {
+            row.add("0");
+        }
+        for (int i = 0; i < builder.length() ; i++) {
+            row.add(builder.substring(i, i + 1));
+        }
+        builder = null;
+        return row;
     }
 
     // Дополнение таблицы истинности значеними формулы
@@ -252,15 +266,12 @@ public class SKNFParser {
        makeTable(a, list);
        addFunctionValueAtTable();
 
-        int last = -1;
-        System.out.println(matrix);
-        for (int i = 1; i < matrix.size(); i++) {
-            if(matrix.get(i).get(matrix.get(i).size() - 1).equals("0")){
-                last = i;
-            }
-        }
 
-        // Построение СКНФ по таблицe истинности
+       for (List<String> list2 : matrix) {
+           System.out.println(list2);
+       }
+
+        // Построение СКНФ по таблице истинности
         if(matrix.get(0).size() == 1) {
             return "";
         }
@@ -286,7 +297,8 @@ public class SKNFParser {
 
         StringBuilder sb = new StringBuilder();
         sb.append("(");
-        int h = subs.size() - 2;
+
+        int h = subs.size() - 1;
         for(int i = 0; i < h - 2; i++) {
             sb.append("(");
         }
@@ -326,8 +338,8 @@ public class SKNFParser {
         }
         sb.deleteCharAt(sb.length() - 1);
 
-        sb.append(")\n");
-
+        sb.append(")");
+        //System.out.println(sb.toString());
         return sb.toString();
     }
 
